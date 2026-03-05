@@ -1,0 +1,27 @@
+<form [formGroup]="form" (ngSubmit)="generarReporte()">
+  <label>
+    Cliente:
+    <select formControlName="clienteId">
+      <option value="" disabled selected>Seleccione un cliente</option>
+      <option *ngFor="let c of clientes()" [value]="c.clienteId">{{ c.nombre }}</option>
+    </select>
+  </label>
+
+  <label>
+    Fecha Inicio: 
+    <input type="date" formControlName="fechaInicio">
+  </label>
+
+  <label>
+    Fecha Fin: 
+    <input type="date" formControlName="fechaFin">
+  </label>
+
+  <button type="submit" [disabled]="loading()">Generar</button>
+</form>
+
+<div *ngIf="reporteUrl">
+  <h3>Previsualización PDF</h3>
+  <iframe [src]="reporteUrl" width="100%" height="600px"></iframe>
+  <button (click)="descargarPDF()">Descargar PDF</button>
+</div>

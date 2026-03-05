@@ -1,0 +1,111 @@
+<div class="page-header">
+  <div>
+    <h1>Clientes</h1>
+    <p class="page-subtitle">Gestión de clientes del sistema bancario</p>
+  </div>
+  <button class="btn btn-accent" (click)="openNew()">
+    <span>＋</span> Nuevo Cliente
+  </button>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input
+  type="text"
+  placeholder="Buscar por nombre, identificación..."
+  [ngModel]="searchQuery()"
+  (ngModelChange)="searchQuery.set($event)"
+/>
+<span *ngIf="searchQuery()" class="search-icon" style="cursor:pointer" (click)="searchQuery.set('')">✕</span>
+  </div>
+  <span class="record-count">
+    {{ filteredClientes().length }} registro(s)
+  </span>
+</div>
+
+<!-- Table Card -->
+<!-- Table Card -->
+<div class="card animate-in">
+  <div *ngIf="loading()">
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+  </div>
+  <div *ngIf="!loading()">
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Identificación</th>
+            <th>Género</th>
+            <th>Edad</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredClientes().length === 0">
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <p>No se encontraron clientes</p>
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let cliente of filteredClientes(); trackBy: trackByClienteId">
+            <td class="id-cell">{{ cliente.clienteId }}</td>
+            <td class="name-cell">
+              <div class="avatar-name">
+                <div class="avatar">{{ cliente.nombre.charAt(0) }}</div>
+                {{ cliente.nombre }}
+              </div>
+            </td>
+            <td>{{ cliente.identificacion }}</td>
+            <td>{{ getGenderLabel(cliente.genero) }}</td>
+            <td>{{ cliente.edad }}</td>
+            <td>{{ cliente.telefono }}</td>
+            <td class="address-cell">{{ cliente.direccion }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-success]="cliente.estado"
+                [class.badge-error]="!cliente.estado"
+              >
+                {{ cliente.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn-edit" title="Editar" (click)="openEdit(cliente)">✏</button>
+                <button class="btn-delete" title="Eliminar" (click)="openDelete(cliente)">🗑</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Form Modal -->
+<app-cliente-form
+  [visible]="showForm()"
+  [cliente]="selectedCliente()"
+  (save)="onSave($event)"
+  (close)="showForm.set(false)"
+/>
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+  [visible]="showConfirm()"
+  title="Eliminar Cliente"
+  [message]="'¿Seguro que desea eliminar al cliente ' + (clienteToDelete()?.nombre ?? '') + '? Esta acción no se puede deshacer.'"
+  (confirm)="onConfirmDelete()"
+  (cancel)="showConfirm.set(false)"
+/>

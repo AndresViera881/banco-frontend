@@ -1,0 +1,102 @@
+@if (visible) {
+  <div class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Editar Movimiento' : 'Nuevo Movimiento' }}</h2>
+        <button class="btn-close" (click)="close.emit()">✕</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="modal-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="fecha">Fecha *</label>
+              <input
+                id="fecha"
+                type="date"
+                formControlName="fecha"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('fecha')"
+                [class.ng-touched]="form.get('fecha')?.touched"
+              />
+              @if (hasError('fecha', 'required')) {
+                <span class="field-error">La fecha es requerida</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="tipoMovimiento">Tipo de Movimiento *</label>
+              <select id="tipoMovimiento" formControlName="tipoMovimiento" class="form-control">
+                <option value="CREDITO">Depósito (Crédito)</option>
+                <option value="DEBITO">Retiro (Débito)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="valor">Valor *</label>
+              <input
+                id="valor"
+                type="number"
+                formControlName="valor"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('valor')"
+                [class.ng-touched]="form.get('valor')?.touched"
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+              />
+              @if (hasError('valor', 'required')) {
+                <span class="field-error">El valor es requerido</span>
+              }
+              @if (hasError('valor', 'min')) {
+                <span class="field-error">El valor debe ser mayor a 0</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="numeroCuenta">Cuenta *</label>
+              <select
+                id="numeroCuenta"
+                formControlName="numeroCuenta"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('numeroCuenta')"
+                [class.ng-touched]="form.get('numeroCuenta')?.touched"
+              >
+                <option value="">Seleccione una cuenta</option>
+                @for (cuenta of cuentas; track cuenta.numeroCuenta) {
+                  <option [value]="cuenta.numeroCuenta">
+                    {{ cuenta.numeroCuenta }} — {{ cuenta.tipoCuenta }} ({{ cuenta.clienteNombre }})
+                  </option>
+                }
+              </select>
+              @if (hasError('numeroCuenta', 'required')) {
+                <span class="field-error">Debe seleccionar una cuenta</span>
+              }
+            </div>
+
+          </div>
+
+          <div class="movement-hint" [class.hint-credit]="form.get('tipoMovimiento')?.value === 'Deposito'"
+            [class.hint-debit]="form.get('tipoMovimiento')?.value === 'Retiro'">
+            <span class="hint-icon">
+              {{ form.get('tipoMovimiento')?.value === 'Deposito' ? '↑' : '↓' }}
+            </span>
+            <span>
+              {{ form.get('tipoMovimiento')?.value === 'Deposito'
+                ? 'El depósito incrementará el saldo disponible'
+                : 'El retiro disminuirá el saldo disponible. Si el saldo es 0, la transacción será rechazada.' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="close.emit()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            {{ isEditMode ? 'Guardar cambios' : 'Registrar movimiento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

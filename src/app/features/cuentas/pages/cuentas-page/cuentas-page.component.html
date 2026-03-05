@@ -1,0 +1,105 @@
+<div class="page-header">
+  <div>
+    <h1>Cuentas</h1>
+    <p class="page-subtitle">Gestión de cuentas bancarias</p>
+  </div>
+  <button class="btn btn-accent" (click)="openNew()">
+    <span>＋</span> Nueva Cuenta
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      placeholder="Buscar por número, tipo, cliente..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
+    @if (searchQuery()) {
+      <span class="search-icon" style="cursor:pointer" (click)="searchQuery.set('')">✕</span>
+    }
+  </div>
+  <span class="record-count">{{ filteredCuentas().length }} registro(s)</span>
+</div>
+
+<div class="card animate-in">
+  @if (loading()) {
+    <div class="loading-overlay"><div class="spinner"></div></div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nro. Cuenta</th>
+            <th>Tipo</th>
+            <th>Saldo Inicial</th>
+            <th>Saldo Disponible</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredCuentas().length === 0) {
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <div class="empty-icon">🏦</div>
+                  <p>No se encontraron cuentas</p>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (cuenta of filteredCuentas(); track cuenta.cuentaId) {
+            <tr>
+              <td class="id-cell">{{ cuenta.cuentaId }}</td>
+              <td>
+                <span class="account-number">{{ cuenta.numeroCuenta }}</span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-ahorro]="cuenta.tipoCuenta === 'Ahorro'" [class.badge-corriente]="cuenta.tipoCuenta === 'Corriente'">
+                  {{ cuenta.tipoCuenta }}
+                </span>
+              </td>
+              <td class="amount">{{ formatCurrency(cuenta.saldoInicial) }}</td>
+              <td class="amount" [class.low-balance]="(cuenta.saldoDisponible ?? cuenta.saldoInicial) === 0">
+                {{ formatCurrency(cuenta.saldoDisponible ?? cuenta.saldoInicial) }}
+              </td>
+              <td>{{ cuenta.clienteNombre }}</td>
+              <td>
+                <span class="badge" [class.badge-success]="cuenta.estado" [class.badge-error]="!cuenta.estado">
+                  {{ cuenta.estado ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-edit" title="Editar" (click)="openEdit(cuenta)">✏</button>
+                  <button class="btn-delete" title="Eliminar" (click)="openDelete(cuenta)">🗑</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<app-cuenta-form
+  [visible]="showForm()"
+  [cuenta]="selectedCuenta()"
+  [clientes]="clientes()"
+  (save)="onSave($event)"
+  (close)="showForm.set(false)"
+/>
+
+<app-confirm-dialog
+  [visible]="showConfirm()"
+  title="Eliminar Cuenta"
+  [message]="'¿Desea eliminar la cuenta ' + (cuentaToDelete()?.numeroCuenta ?? '') + '?'"
+  (confirm)="onConfirmDelete()"
+  (cancel)="showConfirm.set(false)"
+/>

@@ -1,0 +1,41 @@
+<nav class="sidebar" [class.collapsed]="collapsed()">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="brand-icon">🏛</div>
+    @if (!collapsed()) {
+      <div class="brand-text">
+        <span class="brand-name">BANCO</span>
+        <span class="brand-tagline">Sistema de Gestión</span>
+      </div>
+    }
+    <button class="collapse-btn" (click)="toggleCollapse()" [attr.title]="collapsed() ? 'Expandir' : 'Colapsar'">
+      {{ collapsed() ? '›' : '‹' }}
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <ul class="nav-list">
+    @for (item of navItems; track item.route) {
+      <li>
+        <a
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [title]="collapsed() ? item.label : ''"
+        >
+          <span class="nav-icon">{{ item.icon }}</span>
+          @if (!collapsed()) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+
+  <!-- Footer -->
+  @if (!collapsed()) {
+    <div class="sidebar-footer">
+      <div class="sidebar-version">v1.0.0</div>
+    </div>
+  }
+</nav>

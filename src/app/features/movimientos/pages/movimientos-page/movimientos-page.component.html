@@ -1,0 +1,118 @@
+<div class="page-header">
+  <div>
+    <h1>Movimientos</h1>
+    <p class="page-subtitle">Registro de transacciones bancarias</p>
+  </div>
+  <button class="btn btn-accent" (click)="openNew()">
+    <span>＋</span> Nuevo Movimiento
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      placeholder="Buscar por cuenta, cliente, tipo..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="searchQuery.set($event)"
+    />
+    <span
+      *ngIf="searchQuery()"
+      class="search-icon"
+      style="cursor:pointer"
+      (click)="searchQuery.set('')"
+    >
+      ✕
+    </span>
+  </div>
+  <span class="record-count">{{ filteredMovimientos().length }} registro(s)</span>
+</div>
+
+<div class="card animate-in">
+  <!-- Loading -->
+  <div *ngIf="loading()">
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div *ngIf="!loading()">
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cuenta</th>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Saldo Disponible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty state -->
+          <tr *ngIf="filteredMovimientos().length === 0">
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="empty-icon">↕</div>
+                <p>No se encontraron movimientos</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Movimientos -->
+          <tr *ngFor="let mov of filteredMovimientos(); trackBy: movTrackBy">
+            <td>{{ mov.movimientoId }}</td>
+            <td>{{ formatDate(mov.fecha) }}</td>
+            <td>{{ mov.numeroCuenta }}</td>
+            <td>{{ mov.clienteNombre }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.badge-credit]="mov.tipoMovimiento === 'CREDITO'"
+                [class.badge-debit]="mov.tipoMovimiento === 'DEBITO'"
+              >
+                {{ mov.tipoMovimiento === 'CREDITO' ? '↑ CREDITO' : '↓ DEBITO' }}
+              </span>
+            </td>
+            <td>
+              <span
+                [class.credit]="mov.valor > 0"
+                [class.debit]="mov.valor < 0"
+              >
+                {{ formatCurrency(mov.valor) }}
+              </span>
+            </td>
+            <td>{{ formatCurrency(mov.saldo) }}</td>
+            <td>
+              <button (click)="openEdit(mov)">✏</button>
+              <button (click)="openDelete(mov)">🗑</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Form Modal -->
+<app-movimiento-form
+  [visible]="showForm()"
+  [movimiento]="selectedMovimiento()"
+  [cuentas]="cuentas()"
+  (save)="onSave($event)"
+  (close)="showForm.set(false)"
+></app-movimiento-form>
+
+<!-- Confirm Dialog -->
+<app-confirm-dialog
+  [visible]="showConfirm()"
+  title="Eliminar Movimiento"
+  message="¿Desea eliminar este movimiento? El saldo de la cuenta podría verse afectado."
+  (confirm)="onConfirmDelete()"
+  (cancel)="showConfirm.set(false)"
+></app-confirm-dialog>

@@ -1,0 +1,105 @@
+@if (visible) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? 'Editar Cuenta' : 'Nueva Cuenta' }}</h2>
+        <button class="btn-close" (click)="close.emit()">✕</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="modal-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="numeroCuenta">Número de Cuenta *</label>
+              <input
+                id="numeroCuenta"
+                type="text"
+                formControlName="numeroCuenta"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('numeroCuenta')"
+                [class.ng-touched]="form.get('numeroCuenta')?.touched"
+                placeholder="Ej: 478758"
+              />
+              @if (hasError('numeroCuenta', 'required')) {
+                <span class="field-error">El número de cuenta es requerido</span>
+              }
+              @if (hasError('numeroCuenta', 'minlength')) {
+                <span class="field-error">Mínimo 5 caracteres</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="tipoCuenta">Tipo de Cuenta *</label>
+              <select id="tipoCuenta" formControlName="tipoCuenta" class="form-control">
+                <option value="Ahorro">Ahorro</option>
+                <option value="Corriente">Corriente</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="saldoInicial">Saldo Inicial *</label>
+              <input
+                id="saldoInicial"
+                type="number"
+                formControlName="saldoInicial"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('saldoInicial')"
+                [class.ng-touched]="form.get('saldoInicial')?.touched"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              />
+              @if (hasError('saldoInicial', 'required')) {
+                <span class="field-error">El saldo inicial es requerido</span>
+              }
+              @if (hasError('saldoInicial', 'min')) {
+                <span class="field-error">El saldo no puede ser negativo</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="clienteId">Cliente *</label>
+              <select
+                id="clienteId"
+                formControlName="clienteId"
+                class="form-control"
+                [class.ng-invalid]="isInvalid('clienteId')"
+                [class.ng-touched]="form.get('clienteId')?.touched"
+              >
+                <option value="">Seleccione un cliente</option>
+                @for (cliente of clientes; track cliente.clienteId) {
+                  <option [value]="cliente.clienteId">{{ cliente.nombre }}</option>
+                }
+              </select>
+              @if (hasError('clienteId', 'required')) {
+                <span class="field-error">Debe seleccionar un cliente</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Estado</label>
+              <div class="toggle-wrapper">
+                <label class="toggle">
+                  <input type="checkbox" formControlName="estado">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">
+                  {{ form.get('estado')?.value ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="close.emit()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            {{ isEditMode ? 'Guardar cambios' : 'Crear cuenta' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
